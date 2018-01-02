@@ -1,0 +1,12 @@
+{% if project_list %}
+    <ul>
+    {% for project in project_list %}
+        <li>
+            {{ project.title }} 
+            <ul><li>{{ project.description }}</li></ul>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No projects are available.</p>
+{% endif %}
