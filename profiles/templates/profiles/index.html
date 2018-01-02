@@ -1,0 +1,10 @@
+{% if user_list %}
+    <ul>
+    {% for user in user_list %}
+        <!-- <li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li> -->
+        <li>{{user.email}}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No users are available.</p>
+{% endif %}
