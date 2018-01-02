@@ -2,7 +2,7 @@
     <ul>
     {% for user in user_list %}
         <!-- <li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li> -->
-        <li>{{user.email}}</a></li>
+        <li><a href="{% url 'profiles:detail' user.id %}">{{ user.email }}</a></li>
     {% endfor %}
     </ul>
 {% else %}
