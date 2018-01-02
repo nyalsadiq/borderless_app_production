@@ -8,6 +8,10 @@ from django.urls import reverse
 class ProfileModelTests(TestCase):
 
     def test_profile_created(self):
+        """
+            Creates a user, makes sure the user is stored in DB with correct
+            attributes
+        """
         user = User.objects.create_user(
             username="koalabear",
             email="koalabear@example.com",
@@ -25,12 +29,18 @@ class ProfileModelTests(TestCase):
 class ProfileModel_HTTPTests(TestCase):
 
     def test_no_profiles(self):
+        """
+            Tests that user_list is empty if no users in DB
+        """
         c = Client()
         response = c.get(reverse('profiles:index'))
         self.assertEqual(response.status_code, 200)
         self.assertQuerysetEqual(response.context['user_list'], [])
 
     def test_one_profile(self):
+        """
+            Makes one user and tests that the index view gets the user
+        """
         User.objects.create_user(
             username="koalabear",
             email="koalabear@example.com",
@@ -40,4 +50,22 @@ class ProfileModel_HTTPTests(TestCase):
         response = c.get(reverse('profiles:index'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context['user_list']), 1)
-        self.assertEqual(response.context['user_list'][0].username, "koalabear")
+        self.assertEqual(response.context['user_list'][0].username,
+                         "koalabear")
+
+    def test_more_profiles(self):
+        """
+            Makes ten users and tests that the index view gets 10 users
+        """
+
+        for x in range(0, 10):
+            User.objects.create_user(
+                username="".join(("koalabear", str(x))),
+                email="".join(("koalabear@example.com", str(x))),
+                password="".join(("secret", str(x)))
+                )
+
+        c = Client()
+        response = c.get(reverse('profiles:index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['user_list']), 10)
