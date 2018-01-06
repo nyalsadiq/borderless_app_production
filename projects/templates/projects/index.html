@@ -2,11 +2,17 @@
     <ul>
     {% for project in project_list %}
         <li>
-            {{ project.title }} 
-            <ul><li>{{ project.description }}</li></ul>
+            <a href="{% url 'projects:detail' project.id %}">{{ project.title }}</a> 
         </li>
     {% endfor %}
     </ul>
 {% else %}
     <p>No projects are available.</p>
 {% endif %}
+
+<form action="{% url 'projects:index' %}" method="post">
+    {% csrf_token %}
+<input type="text" placeholder="Project Title" name="project_title" required/>
+<input type="text" placeholder="Description" name="description"/>    
+<input type="submit" value="Create" name="submit"/>
+</form>

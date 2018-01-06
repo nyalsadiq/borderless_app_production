@@ -12,3 +12,10 @@ class Project(models.Model):
 
     def to_string(self):
         return self.title + " " + self.description
+
+class Requirement(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    text = models.TextField(max_length=500, blank=False)
+
+    def __str__(self):
+        return self.text
