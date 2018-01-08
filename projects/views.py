@@ -5,7 +5,9 @@ from django.http import JsonResponse, HttpResponseForbidden, HttpResponse, Query
 from django.core import serializers
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-
+from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
+from .serializers import ProjectSerializer,ProjectDetailSerializer,RequirementSerializer
 
 class IndexView(View):
     context_object_name = 'project_list'
@@ -15,10 +17,13 @@ class IndexView(View):
             GET returns queryset of all projects
         """
         project_list = Project.objects.all()
-        response = serializers.serialize("json", project_list)
-        return HttpResponse(response, content_type='application/json')
 
-    
+        if project_list:
+            serializer = ProjectSerializer(project_list, many=True)
+            return JsonResponse(serializer.data,safe=False)
+        else:
+            return JsonResponse({'result': 'no projects'})
+            
     def post(self, request, *args, **kwargs):
         """
             POST creates a new project with title and description parameters
@@ -28,7 +33,7 @@ class IndexView(View):
 
         Project.objects.create(title = project_title, description=description)
 
-        return JsonResponse({'status': 'created'})
+        return JsonResponse({'result': 'created'})
 
 class ProjectView(View):
     context_object_name = 'project'
@@ -39,15 +44,18 @@ class ProjectView(View):
         """
         project_id = kwargs.get('project_id')
 
+        
+        #response = Project.objects.raw('''SELECT * FROM projects_project 
+        #LEFT OUTER JOIN projects_requirement ON projects_project.id = projects_requirement.project_id
+        #WHERE projects_requirement.project_id = %s''', [project_id])
+        
         project = get_object_or_404(Project, pk=project_id)
-        requirements = Requirement.objects.filter(project=project.id)
 
-        project_json = serializers.serialize("json", [project])
-        requirements_json = serializers.serialize("json", requirements)
-
-        response = [project_json,requirements_json]
-        return HttpResponse(response, content_type='application/json')
-    
+        if project:
+            serializer = ProjectDetailSerializer(project)
+            return JsonResponse(serializer.data, safe=False)
+        else:
+            return JsonResponse({'result': 'no project'})
 
     def post(self, request, *args, **kwargs):
         """
@@ -69,15 +77,15 @@ class ProjectView(View):
             project.description = new_value
             project.save()
         else:
-            return JsonResponse({'status':'invalid'})
+            return JsonResponse({'result':'invalid'})
 
-        return JsonResponse({'status':'updated'})
+        return JsonResponse({'result':'updated'})
 
     def delete(self, request, *args, **kwargs):
         project_id = kwargs.get('project_id')
         project = get_object_or_404(Project, pk=project_id)
         project.delete()
-        return JsonResponse({'status':'deleted'})
+        return JsonResponse({'result':'deleted'})
 
 
     

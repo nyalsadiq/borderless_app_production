@@ -22,10 +22,8 @@ class IndexPageTests(TestCase):
             Tests to see if we get an appropriate response to no projects.
         """
         response = self.client.get(reverse('projects:index'))
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "No projects are available.")
-        self.assertQuerysetEqual(response.context['project_list'], [])
+        
+        self.assertJSONEqual(response.content, {'result':'no projects'})
 
     def test_one_project(self):
         """
@@ -33,11 +31,10 @@ class IndexPageTests(TestCase):
         """
         create_project(title="Star Wars", description="Need a cameraman.", location="Edinburgh")
         response = self.client.get(reverse('projects:index'))
-
-        self.assertQuerysetEqual(
-            response.context['project_list'],
-            ['<Project: Star Wars>']
-        )
+        self.assertJSONEqual(response.content, 
+        [{
+            "id": 1, "title": "Star Wars", "description": "Need a cameraman.", "location": "Edinburgh"
+        }])
 
     def test_two_projects(self):
         """
@@ -47,11 +44,19 @@ class IndexPageTests(TestCase):
         create_project(title="Sea Photoshoot", description="Need a diver.", location="Edinburgh")
         response = self.client.get(reverse('projects:index'))
 
-        self.assertQuerysetEqual(
-            response.context['project_list'],
-            ['<Project: Star Wars>','<Project: Sea Photoshoot>'],
-            ordered=False
-        )  
+        self.assertJSONEqual(response.content, 
+        [{
+            "id": 1,
+            "title": "Star Wars",
+            "description": "Need a cameraman.",
+            "location": "Edinburgh"
+        },
+        {
+            "id": 2,
+            "title": "Sea Photoshoot",
+            "description": "Need a diver.",
+            "location": "Edinburgh"
+        }])
 
 class DetailPageTests(TestCase):
     """
@@ -65,8 +70,15 @@ class DetailPageTests(TestCase):
         project = create_project(title="Star Wars", description="Need a cameraman.", location="Edinburgh")
         response = self.client.get(reverse('projects:detail', args=(project.id,)))
 
-        self.assertContains(response, "No requirements")
-        self.assertEqual(response.context['project'].title, "Star Wars")          
+        self.assertJSONEqual(
+            response.content,
+            {
+                "id": 1,
+                "title": "Star Wars",
+                "description": "Need a cameraman.",
+                "location": "Edinburgh",
+                "requirements": []
+            })
 
     def test_one_requirement(self):
         """
@@ -75,10 +87,17 @@ class DetailPageTests(TestCase):
         project = create_project(title="Star Wars", description="Need a cameraman.", location="Edinburgh")
         requirement = create_requirements(text="Camera", project=project)
         response = self.client.get(reverse('projects:detail', args=(project.id,)))
-        
-        self.assertEqual(response.context['project'].title, "Star Wars")
-        self.assertQuerysetEqual(
-            response.context['requirements'],
-            ['<Requirement: Camera>'],
-            ordered=False 
-        )   
+
+        self.assertJSONEqual(
+           response.content,
+           {
+                "id": 1,
+                "title": "Star Wars",
+                "description": "Need a cameraman.",
+                "location": "Edinburgh",
+                "requirements": [
+                    {
+                        "text": "Camera"
+                    }
+                ]
+            })

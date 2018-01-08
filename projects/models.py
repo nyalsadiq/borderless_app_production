@@ -15,7 +15,7 @@ class Project(models.Model):
 
 class Requirement(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    text = models.TextField(max_length=500, blank=False)
+    text = models.TextField(max_length=50, blank=False)
 
     def __str__(self):
         return self.text
