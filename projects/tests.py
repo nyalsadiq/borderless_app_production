@@ -25,7 +25,7 @@ class IndexPageTests(TestCase):
         """
         response = self.client.get(reverse('projects:index'))
         
-        self.assertJSONEqual(response.content, {'result':'no projects'})
+        self.assertJSONEqual(response.content, [])
 
     def test_one_project(self):
         """
