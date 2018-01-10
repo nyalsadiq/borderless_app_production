@@ -28,12 +28,15 @@ class IndexView(View):
         """
             POST creates a new project with title and description parameters
         """
-        project_title = request.POST['project_title']
-        description = request.POST['description']
+        data = JSONParser().parse(request)
+        serializer = ProjectDetailSerializer(data=data)
 
-        Project.objects.create(title = project_title, description=description)
+        if not serializer.is_valid():
+            return JsonResponse(serializer.errors, status=400)
 
-        return JsonResponse({'result': 'created'})
+        serializer.save()
+
+        return JsonResponse(serializer.data, status=201)
 
 class ProjectView(View):
     context_object_name = 'project'
@@ -44,48 +47,47 @@ class ProjectView(View):
         """
         project_id = kwargs.get('project_id')
 
-        
-        #response = Project.objects.raw('''SELECT * FROM projects_project 
-        #LEFT OUTER JOIN projects_requirement ON projects_project.id = projects_requirement.project_id
-        #WHERE projects_requirement.project_id = %s''', [project_id])
-        
         project = get_object_or_404(Project, pk=project_id)
 
-        if project:
-            serializer = ProjectDetailSerializer(project)
-            return JsonResponse(serializer.data, safe=False)
-        else:
-            return JsonResponse({'result': 'no project'})
+        serializer = ProjectDetailSerializer(project)
+        return JsonResponse(serializer.data, safe=False)
+    
 
-    def post(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         """
             PATCH updates title/description field of specific project
             DELETE deletes specific project
             The request to be used (patch/delete) is posted via the 'field' hidden input
         """
         project_id = kwargs.get('project_id')
-        
-        field = request.POST['field']
-        new_value = request.POST['new_value']
-
         project = get_object_or_404(Project, pk=project_id)
 
-        if (field == "title"):
-            project.title = new_value
-            project.save()
-        elif (field == "description"):
-            project.description = new_value
-            project.save()
-        else:
-            return JsonResponse({'result':'invalid'})
+        data = JSONParser().parse(request)
+        serializer = ProjectDetailSerializer(project, data=data, partial=True)
 
-        return JsonResponse({'result':'updated'})
+        if not serializer.is_valid():
+            return JsonResponse(serializer.errors, status=404)
+
+        serializer.save()
+        return JsonResponse(serializer.data)
 
     def delete(self, request, *args, **kwargs):
-        project_id = kwargs.get('project_id')
-        project = get_object_or_404(Project, pk=project_id)
-        project.delete()
-        return JsonResponse({'result':'deleted'})
+        data = JSONParser().parse(request)
+
+        deletion_type = data.get('type', "")
+
+        if deletion_type == "project":
+            project_id = kwargs.get('project_id')
+            project = get_object_or_404(Project, pk=project_id)
+            project.delete()
+        elif deletion_type == "requirement":
+            requirement_id = kwargs.get('project_id')
+            requirement = get_object_or_404(Requirement, pk=requirement_id)
+            requirement.delete()
+        else:
+            return JsonResponse({"error":"You must provide the deletion type"}, status=404)
+
+        return HttpResponse(status=204)
 
 
     

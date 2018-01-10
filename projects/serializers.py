@@ -10,16 +10,40 @@ class ProjectSerializer(serializers.ModelSerializer):
 class RequirementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Requirement
-        fields = ('text',)
+        fields = ('id','text')
+
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
-    requirements = serializers.SerializerMethodField()
+    requirements = RequirementSerializer(many=True, required=False)
     class Meta:
         model = Project
-        fields = ('id', 'title', 'description', 'location', 'requirements')
-        
-    def get_requirements(self, obj):
-        project_id = obj.id
-        requirements = Requirement.objects.filter(project__id=project_id).values()
-        return RequirementSerializer(requirements, many=True).data
+        fields = ('id','title', 'description','location','requirements')
+
+    def create(self, validated_data):
+        if 'requirements' in validated_data:
+            requirements_data = validated_data.pop('requirements')
+        else:
+            requirements_data = []
+
+        project = Project.objects.create(**validated_data)
+
+        for requirement_data in requirements_data:
+            Requirement.objects.create(project=project, **requirement_data)
+
+        return project
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.description = validated_data.get('description', instance.description)
+        instance.location = validated_data.get('location', instance.location)
+
+        if 'requirements' in validated_data:
+            requirements_data = validated_data.get('requirements', [])
+            for requirement_data in requirements_data:
+                req = Requirement(project_id=self.data['id'], **requirement_data)
+                req.save()
+
+        instance.save()
+        return instance
+
 
