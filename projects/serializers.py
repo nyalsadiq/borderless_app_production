@@ -2,9 +2,10 @@ from rest_framework import serializers
 from .models import Project, Requirement
 
 class ProjectSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
     class Meta:
         model = Project
-        fields = ('id', 'title', 'description', 'location')
+        fields = ('id', 'title','owner','description', 'location')
 
 
 class RequirementSerializer(serializers.ModelSerializer):
@@ -15,9 +16,11 @@ class RequirementSerializer(serializers.ModelSerializer):
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
     requirements = RequirementSerializer(many=True, required=False)
+    owner = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
         model = Project
-        fields = ('id','title', 'description','location','requirements')
+        fields = ('id','title','owner', 'description','location','requirements')
 
     def create(self, validated_data):
         if 'requirements' in validated_data:

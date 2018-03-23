@@ -15,6 +15,6 @@ app_name = 'profiles'
 # ]
 
 urlpatterns = [
-    path('', views.IndexView.as_view(), name='index'),
-    path('<int:pk>/', views.DetailView.as_view(), name='detail')
-    ]
+    path('', views.UserList.as_view(), name='index'),
+    path('<int:pk>/', views.UserDetail.as_view(), name='detail')
+]

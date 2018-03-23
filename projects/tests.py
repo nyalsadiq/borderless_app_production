@@ -3,13 +3,21 @@ from .models import Project, Requirement
 from django.urls import reverse
 import json
 from rest_framework.test import APIClient
+from profiles.models import User
 # Create your tests here.
 
-def create_project(title, description, location):
-    return Project.objects.create(title=title, description=description, location=location)
+def create_project(title, owner,description, location):
+    return Project.objects.create(title=title, owner = owner,description=description, location=location)
 
 def create_requirements(text, project):
     return Requirement.objects.create(text=text, project=project)
+
+def create_user():
+    user = User.objects.create_user(
+            username="koalabear",
+            email="koalabear@example.com",
+            password="secret")
+    return user
     
 class IndexPageTests(TestCase):
     """
@@ -31,31 +39,35 @@ class IndexPageTests(TestCase):
         """
             Tests for appropriate response for one project.
         """
-        create_project(title="Star Wars", description="Need a cameraman.", location="Edinburgh")
+        user = create_user()
+        create_project(title="Star Wars",owner=user, description="Need a cameraman.", location="Edinburgh")
         response = self.client.get(reverse('projects:index'))
         self.assertJSONEqual(response.content, 
         [{
-            "id": 1, "title": "Star Wars", "description": "Need a cameraman.", "location": "Edinburgh"
+            "id": 1, "title": "Star Wars","owner":"koalabear", "description": "Need a cameraman.", "location": "Edinburgh"
         }])
 
     def test_two_projects(self):
         """
             Tests for appropriate response for two projects.
         """
-        create_project(title="Star Wars", description="Need a cameraman.", location="Edinburgh")
-        create_project(title="Sea Photoshoot", description="Need a diver.", location="Edinburgh")
+        user = create_user()
+        create_project(title="Star Wars",owner=user, description="Need a cameraman.", location="Edinburgh")
+        create_project(title="Sea Photoshoot",owner=user, description="Need a diver.", location="Edinburgh")
         response = self.client.get(reverse('projects:index'))
 
         self.assertJSONEqual(response.content, 
         [{
             "id": 1,
             "title": "Star Wars",
+            "owner":"koalabear",
             "description": "Need a cameraman.",
             "location": "Edinburgh"
         },
         {
             "id": 2,
             "title": "Sea Photoshoot",
+            "owner":"koalabear",
             "description": "Need a diver.",
             "location": "Edinburgh"
         }])
@@ -64,12 +76,14 @@ class DetailPageTests(TestCase):
     """
         Tests for appropriate responses from detail view.
     """
+    
 
     def test_no_requirements(self):
         """
             Tests for good response when there are no requirements.
         """
-        project = create_project(title="Star Wars", description="Need a cameraman.", location="Edinburgh")
+        user = create_user()
+        project = create_project(title="Star Wars", owner=user, description="Need a cameraman.", location="Edinburgh")
         response = self.client.get(reverse('projects:detail', args=(project.id,)))
 
         self.assertJSONEqual(
@@ -77,6 +91,7 @@ class DetailPageTests(TestCase):
             {
                 "id": 1,
                 "title": "Star Wars",
+                "owner":"koalabear",
                 "description": "Need a cameraman.",
                 "location": "Edinburgh",
                 "requirements": []
@@ -86,7 +101,8 @@ class DetailPageTests(TestCase):
         """
             Tests for good response when there is one requirement.
         """
-        project = create_project(title="Star Wars", description="Need a cameraman.", location="Edinburgh")
+        user = create_user()
+        project = create_project(title="Star Wars",owner=user,description="Need a cameraman.", location="Edinburgh")
         requirement = create_requirements(text="Camera", project=project)
         response = self.client.get(reverse('projects:detail', args=(project.id,)))
 
@@ -94,6 +110,7 @@ class DetailPageTests(TestCase):
            response.content,
            {
                 "id": 1,
+                "owner":"koalabear",
                 "title": "Star Wars",
                 "description": "Need a cameraman.",
                 "location": "Edinburgh",
@@ -109,19 +126,25 @@ class DetailPageTests(TestCase):
 class DeletionTest(TestCase):
 
     def test_delete_project(self):
-        project = create_project(title="Star Wars", description="Need a cameraman.", location="Edinburgh")
+        user = create_user()
+        project = create_project(title="Star Wars",owner=user, description="Need a cameraman.", location="Edinburgh")
         requirement = create_requirements(text="Camera", project=project)
 
         client = APIClient()
+        client.login(username="koalabear",password="secret")
+
         response = client.delete( reverse('projects:detail', args=(project.id,)) , {'type': 'project'} , format='json' )
         self.assertEqual(response.status_code, 204)
 
     def test_delete_requirement(self):
-        project = create_project(title="Star Wars", description="Need a cameraman.", location="Edinburgh")
+        user = create_user()
+        project = create_project(title="Star Wars", owner=user,description="Need a cameraman.", location="Edinburgh")
         requirement = create_requirements(text="Camera", project=project)
         create_requirements(text="Lightsaber", project=project)
 
         client=APIClient()
+        client.login(username="koalabear",password="secret")
+
         response = client.delete( reverse('projects:detail', args=(requirement.id,)) , {'type': 'requirement'} , format='json' )
         self.assertEqual(response.status_code, 204)
         
@@ -130,6 +153,7 @@ class DeletionTest(TestCase):
             {
                 "id": 1,
                 "title": "Star Wars",
+                "owner":"koalabear",
                 "description": "Need a cameraman.",
                 "location": "Edinburgh",
                 "requirements": [
@@ -143,11 +167,13 @@ class DeletionTest(TestCase):
 class UpdateTest(TestCase):
 
     def test_update_title_description_and_location(self):
-        project = create_project(title="Star Wars", description="Need a cameraman.", location="Edinburgh")
+        user = create_user()
+        project = create_project(title="Star Wars",owner=user, description="Need a cameraman.", location="Edinburgh")
         requirement = create_requirements(text="Camera", project=project)
         create_requirements(text="Lightsaber", project=project)
 
         client = APIClient()
+        client.login(username="koalabear",password="secret")
         response = client.patch( reverse('projects:detail', args=(project.id,)) , 
         {'title':'Star Trek','description':'New','location':'Glasgow'},
         format='json' )
@@ -156,6 +182,7 @@ class UpdateTest(TestCase):
             {
                 "id": 1,
                 "title": "Star Trek",
+                "owner": "koalabear",
                 "description": "New",
                 "location": "Glasgow",
                 "requirements": [
@@ -171,11 +198,14 @@ class UpdateTest(TestCase):
             })
 
     def test_update_requirements(self):
-        project = create_project(title="Star Wars", description="Need a cameraman.", location="Edinburgh")
+        user = create_user()
+
+        project = create_project(title="Star Wars",owner=user, description="Need a cameraman.", location="Edinburgh")
         requirement = create_requirements(text="Camera", project=project)
         create_requirements(text="Lightsaber", project=project)
 
         client = APIClient()
+        client.login(username="koalabear",password="secret")
         response = client.patch( reverse('projects:detail', args=(project.id,)) , 
         {'requirements': [{"text":"Yoda"},{"text":"Samuel L Jackson"}]},
         format='json' )
@@ -187,6 +217,7 @@ class UpdateTest(TestCase):
             {
                 "id": 1,
                 "title": "Star Wars",
+                "owner": "koalabear",
                 "description": "Need a cameraman.",
                 "location": "Edinburgh",
                 "requirements": [
@@ -204,14 +235,19 @@ class UpdateTest(TestCase):
 class CreateTest(TestCase):
 
     def test_create_without_requirements(self):
+        user = create_user()
+        
         client = APIClient()
+        client.login(username="koalabear",password="secret")
+
         response = client.post( reverse('projects:index') , 
-        {'title':'Star Wars','description':'Need a cameraman.','location':'Edinburgh'} , format='json')
+        {'title':'Star Wars','owner':'koalabear','description':'Need a cameraman.','location':'Edinburgh'} , format='json')
 
         self.assertJSONEqual(response.content,
             {
                 'id': 1,
                 'title': 'Star Wars',
+                'owner': 'koalabear',
                 'description': 'Need a cameraman.',
                 'location': 'Edinburgh',
                 'requirements': []
@@ -219,15 +255,20 @@ class CreateTest(TestCase):
         )
 
     def test_create_with_requirements(self):
+        user = create_user()
+
         client = APIClient()
+        client.login(username="koalabear",password="secret")
+
         response = client.post( reverse('projects:index') , 
-        {'title':'Star Wars','description':'Need a cameraman.','location':'Edinburgh', 
+        {'title':'Star Wars','owner':'koalabear','description':'Need a cameraman.','location':'Edinburgh', 
         'requirements': [{'text':'Yoda'},{'text':'Helmet'}]} , format='json')
 
         self.assertJSONEqual(response.content,
             {
                 'id': 1,
                 'title': 'Star Wars',
+                'owner': 'koalabear',
                 'description': 'Need a cameraman.',
                 'location': 'Edinburgh',
                 'requirements': [
