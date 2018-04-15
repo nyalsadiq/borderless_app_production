@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, Requirement
+from .models import Project, Requirement, Comment
 
 class ProjectSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
@@ -13,14 +13,21 @@ class RequirementSerializer(serializers.ModelSerializer):
         model = Requirement
         fields = ('id','text')
 
+class CommentSerializer(serializers.ModelSerializer):
+    project = serializers.ReadOnlyField(source='project.title')
+    owner = serializers.ReadOnlyField(source='owner.username')
+    class Meta:
+        model = Comment
+        fields = ('id','project','owner','body')
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
     requirements = RequirementSerializer(many=True, required=False)
     owner = serializers.ReadOnlyField(source='owner.username')
+    comments = CommentSerializer(many=True, required=False)
 
     class Meta:
         model = Project
-        fields = ('id','title','owner', 'description','location','requirements')
+        fields = ('id','title','owner', 'description','location','requirements','comments', 'likes')
 
     def create(self, validated_data):
         if 'requirements' in validated_data:
@@ -39,7 +46,8 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
         instance.title = validated_data.get('title', instance.title)
         instance.description = validated_data.get('description', instance.description)
         instance.location = validated_data.get('location', instance.location)
-
+        instance.likes = validated_data.get('likes',instance.likes)
+  
         if 'requirements' in validated_data:
             requirements_data = validated_data.get('requirements', [])
             for requirement_data in requirements_data:

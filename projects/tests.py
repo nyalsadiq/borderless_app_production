@@ -94,7 +94,9 @@ class DetailPageTests(TestCase):
                 "owner":"koalabear",
                 "description": "Need a cameraman.",
                 "location": "Edinburgh",
-                "requirements": []
+                "requirements": [],
+                "comments": [],
+                "likes": 0
             })
 
     def test_one_requirement(self):
@@ -119,7 +121,9 @@ class DetailPageTests(TestCase):
                         "id": 1,
                         "text": "Camera"
                     }
-                ]
+                ],
+                "comments": [],
+                "likes": 0
             })
 
 
@@ -161,7 +165,9 @@ class DeletionTest(TestCase):
                         "id": 2,
                         "text": "Lightsaber"
                     }
-                ]
+                ],
+                "comments": [],
+                "likes": 0
             })
 
 class UpdateTest(TestCase):
@@ -194,7 +200,9 @@ class UpdateTest(TestCase):
                         "id": 2,
                         "text": "Lightsaber"
                     }
-                ]
+                ],
+                "comments": [],
+                "likes": 0
             })
 
     def test_update_requirements(self):
@@ -229,7 +237,9 @@ class UpdateTest(TestCase):
                         "id": 2,
                         "text": "Lightsaber"
                     }
-                ]
+                ],
+                "comments": [],
+                "likes": 0
             })
 
 class CreateTest(TestCase):
@@ -250,7 +260,9 @@ class CreateTest(TestCase):
                 'owner': 'koalabear',
                 'description': 'Need a cameraman.',
                 'location': 'Edinburgh',
-                'requirements': []
+                'requirements': [],
+                "comments": [],
+                "likes": 0
             }
         )
 
@@ -280,6 +292,8 @@ class CreateTest(TestCase):
                         'id': 2,
                         'text': 'Helmet'
                     }
-                ]
+                ],
+                "comments": [],
+                "likes": 0
             }
         )

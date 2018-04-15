@@ -8,8 +8,6 @@ class UserList(generic.ListView):
     model = User
     template_name = 'profiles/index.html'
     
-
-
 class UserDetail(generic.DetailView):
     model = User
     template_name = 'profiles/user_details.html'
