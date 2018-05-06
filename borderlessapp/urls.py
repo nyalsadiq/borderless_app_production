@@ -18,6 +18,7 @@ from django.urls import path, include, re_path
 from django.conf.urls import include
 from projects import views
 from rest_framework_jwt.views import obtain_jwt_token, verify_jwt_token, refresh_jwt_token
+from rest_framework.documentation import include_docs_urls
 
 urlpatterns = [
     path('', views.api_root),
@@ -28,4 +29,5 @@ urlpatterns = [
     path('api-token-auth/', obtain_jwt_token),
     path('api-token-verify/', verify_jwt_token),
     path('api-token-refresh/', refresh_jwt_token),
+    path('docs/', include_docs_urls(title='Borderless API')),
 ]
