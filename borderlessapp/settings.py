@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cacheops',
 ]
 
 MIDDLEWARE = [
@@ -83,12 +84,42 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10000/day',
+        'user': '10000/day'
+    }
 }
 
 JWT_AUTH = {
     'JWT_ALLOW_REFRESH' : True,
     'JWT_EXPIRATION_DELTA' : datetime.timedelta(seconds=600), #10 mins
 }
+CACHEOPS_DEFAULTS = {
+    'timeout': 60*60
+}
+CACHEOPS_REDIS = "redis://localhost:6379/1"
+CACHEOPS = {
+    'auth.User': {'ops':{'fetch','get'},'timeout': 60*60},
+    'auth.*': {'ops':{'fetch', 'get'}, 'timeout': 60*60},
+    'projects.Project':{'ops':{'fetch','get'},'timeout':60*60},
+    'profiles.Profile':{'ops':{'fetch','get'}},
+    '*.*':{},
+}
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+CACHE_TTL = 60 * 15
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
