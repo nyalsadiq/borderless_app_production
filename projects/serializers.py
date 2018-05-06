@@ -4,18 +4,18 @@ import logging
 
 logger = logging.getLogger("Serializer")
 
-class ProjectSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.username')
-    class Meta:
-        model = Project
-        fields = ('id', 'title','owner','description', 'location',)
-
-
 class RequirementSerializer(serializers.ModelSerializer):
     project = serializers.ReadOnlyField(source='project.title')
     class Meta:
         model = Requirement
         fields = ('id','project','text')
+
+class ProjectSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+    requirements = RequirementSerializer(many = True, required=False, read_only=True)
+    class Meta:
+        model = Project
+        fields = ('id', 'title','owner','description', 'location','requirements',)
 
 class CommentSerializer(serializers.ModelSerializer):
     project = serializers.ReadOnlyField(source='project.title')
