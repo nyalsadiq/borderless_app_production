@@ -119,6 +119,7 @@ class DetailPageTests(TestCase):
                 "requirements": [
                     {
                         "id": 1,
+                        "project": "Star Wars",
                         "text": "Camera"
                     }
                 ],
@@ -137,7 +138,7 @@ class DeletionTest(TestCase):
         client = APIClient()
         client.login(username="koalabear",password="secret")
 
-        response = client.delete( reverse('projects:detail', args=(project.id,)) , {'type': 'project'} , format='json' )
+        response = client.delete( reverse('projects:detail', args=(project.id,)))
         self.assertEqual(response.status_code, 204)
 
     def test_delete_requirement(self):
@@ -149,26 +150,9 @@ class DeletionTest(TestCase):
         client=APIClient()
         client.login(username="koalabear",password="secret")
 
-        response = client.delete( reverse('projects:detail', args=(requirement.id,)) , {'type': 'requirement'} , format='json' )
+        response = client.delete( reverse('projects:detail', args=(requirement.id,)))
         self.assertEqual(response.status_code, 204)
-        
-        response = client.get( reverse('projects:detail', args=(project.id,)) )
-        self.assertJSONEqual(response.content,
-            {
-                "id": 1,
-                "title": "Star Wars",
-                "owner":"koalabear",
-                "description": "Need a cameraman.",
-                "location": "Edinburgh",
-                "requirements": [
-                    {
-                        "id": 2,
-                        "text": "Lightsaber"
-                    }
-                ],
-                "comments": [],
-                "likes": 0
-            })
+          
 
 class UpdateTest(TestCase):
 
@@ -194,47 +178,12 @@ class UpdateTest(TestCase):
                 "requirements": [
                     {
                         "id": 1,
+                        "project": "Star Trek",
                         "text": "Camera"
                     },
                     {
                         "id": 2,
-                        "text": "Lightsaber"
-                    }
-                ],
-                "comments": [],
-                "likes": 0
-            })
-
-    def test_update_requirements(self):
-        user = create_user()
-
-        project = create_project(title="Star Wars",owner=user, description="Need a cameraman.", location="Edinburgh")
-        requirement = create_requirements(text="Camera", project=project)
-        create_requirements(text="Lightsaber", project=project)
-
-        client = APIClient()
-        client.login(username="koalabear",password="secret")
-        response = client.patch( reverse('projects:detail', args=(project.id,)) , 
-        {'requirements': [{"text":"Yoda"},{"text":"Samuel L Jackson"}]},
-        format='json' )
-
-        '''
-            Patch does not return updated requirements values.
-        '''
-        self.assertJSONEqual(response.content,
-            {
-                "id": 1,
-                "title": "Star Wars",
-                "owner": "koalabear",
-                "description": "Need a cameraman.",
-                "location": "Edinburgh",
-                "requirements": [
-                    {
-                        "id": 1,
-                        "text": "Camera"
-                    },
-                    {
-                        "id": 2,
+                        "project": "Star Trek",
                         "text": "Lightsaber"
                     }
                 ],
@@ -261,38 +210,6 @@ class CreateTest(TestCase):
                 'description': 'Need a cameraman.',
                 'location': 'Edinburgh',
                 'requirements': [],
-                "comments": [],
-                "likes": 0
-            }
-        )
-
-    def test_create_with_requirements(self):
-        user = create_user()
-
-        client = APIClient()
-        client.login(username="koalabear",password="secret")
-
-        response = client.post( reverse('projects:index') , 
-        {'title':'Star Wars','owner':'koalabear','description':'Need a cameraman.','location':'Edinburgh', 
-        'requirements': [{'text':'Yoda'},{'text':'Helmet'}]} , format='json')
-
-        self.assertJSONEqual(response.content,
-            {
-                'id': 1,
-                'title': 'Star Wars',
-                'owner': 'koalabear',
-                'description': 'Need a cameraman.',
-                'location': 'Edinburgh',
-                'requirements': [
-                    {
-                        'id': 1,
-                        'text': 'Yoda'
-                    },
-                    {
-                        'id': 2,
-                        'text': 'Helmet'
-                    }
-                ],
                 "comments": [],
                 "likes": 0
             }

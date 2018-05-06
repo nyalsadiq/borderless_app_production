@@ -35,7 +35,7 @@ class ProfileModel_HTTPTests(TestCase):
         c = Client()
         response = c.get(reverse('profiles:index'))
         self.assertEqual(response.status_code, 200)
-        self.assertQuerysetEqual(response.context['user_list'], [])
+        self.assertEqual(len(response.data),0)
 
     def test_one_profile(self):
         """
@@ -49,9 +49,7 @@ class ProfileModel_HTTPTests(TestCase):
         c = Client()
         response = c.get(reverse('profiles:index'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['user_list']), 1)
-        self.assertEqual(response.context['user_list'][0].username,
-                         "koalabear")
+        self.assertEqual(len(response.data), 1)
 
     def test_more_profiles(self):
         """
@@ -68,4 +66,4 @@ class ProfileModel_HTTPTests(TestCase):
         c = Client()
         response = c.get(reverse('profiles:index'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context['user_list']), 10)
+        self.assertEqual(len(response.data), 10)
