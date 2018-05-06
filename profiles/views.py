@@ -1,16 +1,18 @@
 from django.shortcuts import render
-from django.views import generic
 from django.contrib.auth.models import User
-from profiles.serializers import UserSerializer
+from profiles.serializers import UserDetailSerializer, UserSerializer
+from profiles.models import Profile
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-class UserList(generic.ListView):
-    model = User
-    template_name = 'profiles/index.html'
-    
-class UserDetail(generic.DetailView):
-    model = User
-    template_name = 'profiles/user_details.html'
+class ProfileList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserDetailSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
 

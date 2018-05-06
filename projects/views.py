@@ -1,18 +1,29 @@
 from projects.models import Project, Requirement, Comment
-from projects.serializers import ProjectSerializer, ProjectDetailSerializer, CommentSerializer
+from projects.serializers import ProjectSerializer, ProjectDetailSerializer, CommentSerializer, RequirementSerializer
 from rest_framework import generics, status, permissions
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.reverse import reverse
+from rest_framework.decorators import api_view
 from django.shortcuts import get_object_or_404
-from projects.permissions import IsOwnerOrReadOnly
+from projects.permissions import IsOwnerOrReadOnly, IsRequestOwnerOrReadOnly
+import logging
 
+logger = logging.getLogger('views')
+
+@api_view(['GET'])
+def api_root(request, format=None):
+    return Response({
+        'profiles': reverse('profiles:index', request=request, format=format),
+        'projects': reverse('projects:index', request=request, format=format)
+    })
 
 class IndexView(generics.ListCreateAPIView):
     queryset = Project.objects.all()
     serializer_class = ProjectDetailSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly)
-
+    
     def get(self, request, format=None):
         projects = Project.objects.all()
         serializer = ProjectSerializer(projects, many=True)
@@ -21,32 +32,33 @@ class IndexView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    
-
 class ProjectView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Project.objects.all()
     serializer_class = ProjectDetailSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly)
 
-    def delete(self, request, *args, **kwargs):
-        data = JSONParser().parse(request)
-        deletion_type = data.get('type', "")
+    def perform_update(self, serializer):
+        serializer.save(owner=self.request.user)
 
-        if deletion_type == "project":
-            project_id = kwargs.get('pk')
-            project = get_object_or_404(Project, pk=project_id)
-            project.delete()
-        elif deletion_type == "requirement":
-            requirement_id = kwargs.get('pk')
-            requirement = get_object_or_404(Requirement, pk=requirement_id)
-            requirement.delete()
-        else:
-            return Response({"error":"You must provide the deletion type"}, status=status.HTTP_404_NOT_FOUND)
+class RequirementView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Requirement.objects.all()
+    serializer_class = RequirementSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsRequestOwnerOrReadOnly)
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-class ReactView(APIView):
+    def post(self, request, *args, **kwargs):
+        project_id = kwargs.get('pk')
+        project = get_object_or_404(Project, pk=project_id)
     
+        serializer = RequirementSerializer(data = request.data)
+        if serializer.is_valid():
+            serializer.save(project = project)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class ReactView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly)
 
     def get(self, request, *args, **kwargs):
@@ -70,6 +82,7 @@ class ReactView(APIView):
         if serializer.is_valid():
             serializer.save(owner = owner, project = project)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     

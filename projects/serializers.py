@@ -1,17 +1,21 @@
 from rest_framework import serializers
 from .models import Project, Requirement, Comment
+import logging
+
+logger = logging.getLogger("Serializer")
 
 class ProjectSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     class Meta:
         model = Project
-        fields = ('id', 'title','owner','description', 'location')
+        fields = ('id', 'title','owner','description', 'location',)
 
 
 class RequirementSerializer(serializers.ModelSerializer):
+    project = serializers.ReadOnlyField(source='project.title')
     class Meta:
         model = Requirement
-        fields = ('id','text')
+        fields = ('id','project','text')
 
 class CommentSerializer(serializers.ModelSerializer):
     project = serializers.ReadOnlyField(source='project.title')
@@ -20,41 +24,11 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('id','project','owner','body')
 
-class ProjectDetailSerializer(serializers.ModelSerializer):
-    requirements = RequirementSerializer(many=True, required=False)
+class ProjectDetailSerializer(serializers.HyperlinkedModelSerializer):
+    requirements = RequirementSerializer(many=True, required=False, read_only=True)
     owner = serializers.ReadOnlyField(source='owner.username')
-    comments = CommentSerializer(many=True, required=False)
+    comments = CommentSerializer(many=True, required=False, read_only=True)
 
     class Meta:
         model = Project
         fields = ('id','title','owner', 'description','location','requirements','comments', 'likes')
-
-    def create(self, validated_data):
-        if 'requirements' in validated_data:
-            requirements_data = validated_data.pop('requirements')
-        else:
-            requirements_data = []
-
-        project = Project.objects.create(**validated_data)
-
-        for requirement_data in requirements_data:
-            Requirement.objects.create(project=project, **requirement_data)
-
-        return project
-
-    def update(self, instance, validated_data):
-        instance.title = validated_data.get('title', instance.title)
-        instance.description = validated_data.get('description', instance.description)
-        instance.location = validated_data.get('location', instance.location)
-        instance.likes = validated_data.get('likes',instance.likes)
-  
-        if 'requirements' in validated_data:
-            requirements_data = validated_data.get('requirements', [])
-            for requirement_data in requirements_data:
-                req = Requirement(project_id=self.data['id'], **requirement_data)
-                req.save()
-
-        instance.save()
-        return instance
-
-
