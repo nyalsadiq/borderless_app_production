@@ -154,6 +154,11 @@ class ReactView(generics.RetrieveUpdateDestroyAPIView):
 @api_view(['get'])
 @permission_classes((permissions.IsAuthenticated,))
 def get_reccomended_jobs(request):
+    """
+    get:
+    Compares users skills against projects and returns a list of matching projects.
+    Must be authenticated.
+    """
     user = request.user
     skills = Skill.objects.filter(user = user)
 
@@ -167,9 +172,7 @@ def get_reccomended_jobs(request):
                 projects.append(p.project)
 
     if len(projects) == 0:
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response("No Matches",status=status.HTTP_204_NO_CONTENT)
 
     serializer = ProjectDetailSerializer(projects,many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
-
-
