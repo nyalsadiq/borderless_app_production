@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from projects.models import Project
-from profiles.models import Profile
+from profiles.models import Profile, Skill
+
 from rest_framework import serializers
 import logging
 
@@ -10,6 +11,12 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ('id','bio','location')
+
+class SkillSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')
+    class Meta:
+        model = Skill
+        fields = ('id', 'user','text')
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -25,13 +32,14 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 class UserDetailSerializer(serializers.HyperlinkedModelSerializer):
     profile = ProfileSerializer(many=False,read_only = False)
+    skills = SkillSerializer(many=True, read_only=False)
     projects = serializers.HyperlinkedRelatedField(many=True,view_name='projects:detail',queryset=Project.objects.all())
+
     class Meta:
         model = User
-        fields = ('id','username','email','projects','profile')
+        fields = ('id','username','email','projects','profile', 'skills')
 
     def update(self, instance, validated_data):
-        logger.error(validated_data)
         profile_data = validated_data.pop('profile',None)
         self.update_or_create_profile(instance, profile_data)
         return super(UserDetailSerializer, self).update(instance, validated_data)

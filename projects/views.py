@@ -1,13 +1,15 @@
 from projects.models import Project, Requirement, Comment
+from profiles.models import Skill
 from projects.serializers import ProjectSerializer, ProjectDetailSerializer, CommentSerializer, RequirementSerializer
-from rest_framework import generics, status, permissions
+from rest_framework import generics, status, permissions, filters
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.reverse import reverse
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
-from projects.permissions import IsOwnerOrReadOnly, IsRequestOwnerOrReadOnly
+from projects.permissions import IsOwnerOrReadOnly, IsRequirementOwnerOrReadOnly
+from rest_framework.decorators import api_view
 import logging
 
 logger = logging.getLogger('views')
@@ -30,7 +32,7 @@ class IndexView(generics.ListCreateAPIView):
     queryset = Project.objects.all()
     serializer_class = ProjectDetailSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly)
-    
+
     def get(self, request, format=None):
         """
         Returns a list of projects at low detail.
@@ -81,7 +83,8 @@ class RequirementView(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Requirement.objects.all()
     serializer_class = RequirementSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsRequestOwnerOrReadOnly)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,IsRequirementOwnerOrReadOnly)
+    search_fields = ('text')
 
     def post(self, request, *args, **kwargs):
         """
@@ -148,3 +151,25 @@ class ReactView(generics.RetrieveUpdateDestroyAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     
+@api_view(['get'])
+@permission_classes((permissions.IsAuthenticated,))
+def get_reccomended_jobs(request):
+    user = request.user
+    skills = Skill.objects.filter(user = user)
+
+    queryset = Requirement.objects.select_related('project').all()
+    
+    projects = []
+    for s in skills:
+        requirements = queryset.filter(text__contains=s.text)
+        for p in requirements:
+            if p.project not in projects:
+                projects.append(p.project)
+
+    if len(projects) == 0:
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    serializer = ProjectDetailSerializer(projects,many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
