@@ -23,7 +23,7 @@ class ProfileList(generics.ListCreateAPIView):
 class SkillView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Skill.objects.all()
     serializer_class = SkillSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,IsSkillOwnerOrReadOnly,IsProfileOwnerOrReadOnly)
+    permission_classes = (IsAuthenticatedOrReadOnly,IsSkillOwnerOrReadOnly)
 
     def post(self, request, *args, **kwargs):
         """
@@ -35,7 +35,7 @@ class SkillView(generics.RetrieveUpdateDestroyAPIView):
 
         if request.user != user:
             return Response("You do not have permission to perform this action.", status=status.HTTP_403_FORBIDDEN)
-            
+
         serializer = SkillSerializer(data = request.data)
         if serializer.is_valid():
             serializer.save(user = user)
