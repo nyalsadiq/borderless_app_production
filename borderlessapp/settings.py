@@ -110,7 +110,7 @@ CACHEOPS = {
     '*.*':{},
 }
 
-CACHEOPS_PREFIX = 'borderless'
+CACHEOPS_PREFIX = 'projects.urls.cacheops_prefix'
 
 
 CACHE_TTL = 60 * 15

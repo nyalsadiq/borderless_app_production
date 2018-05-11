@@ -6,6 +6,8 @@ from django.conf import settings
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 #(cache_page(CACHE_TTL))
+def cacheops_prefix(query):
+    return 'borderless'
 
 app_name = 'projects'
 urlpatterns = [
