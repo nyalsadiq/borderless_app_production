@@ -110,6 +110,8 @@ CACHEOPS = {
     '*.*':{},
 }
 
+CACHEOPS_PREFIX = 'borderless'
+
 
 CACHE_TTL = 60 * 15
 
