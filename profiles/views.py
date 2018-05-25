@@ -8,6 +8,13 @@ from projects.permissions import IsOwnerOrReadOnly, IsSkillOwnerOrReadOnly, IsPr
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 
+import logging
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework import generics, status, permissions, filters
+from rest_framework_jwt.views import obtain_jwt_token
+from rest_framework.reverse import reverse
+
+logger = logging.getLogger('views')
 
 class ProfileList(generics.ListCreateAPIView):
     """
@@ -65,3 +72,12 @@ class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserDetailSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,IsProfileOwnerOrReadOnly)
+
+@api_view(['get'])
+@permission_classes((permissions.IsAuthenticated,))
+def get_profile_with_token(request):
+
+    user = User.objects.get(username=request.user)
+    serializer = UserDetailSerializer(user, context={'request':request})
+   
+    return Response(serializer.data, status=status.HTTP_200_OK)

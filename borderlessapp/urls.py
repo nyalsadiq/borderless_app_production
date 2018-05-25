@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf.urls import include
 from projects import views
+from profiles import views as profile_views
 from rest_framework_jwt.views import obtain_jwt_token, verify_jwt_token, refresh_jwt_token
 from rest_framework.documentation import include_docs_urls
 
