@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 import os
 import datetime
-
+import dj_database_url
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -126,11 +126,13 @@ DATABASES = {
         'NAME': 'd4qetq3getfbtf',
         'USER': 'iwifdlfaprgqqd',
         'PASSWORD': '40c0db4d5f86222b8ca845c4066cfb85f36315e023ceaa31b40461b0efb9555d',
-        'HOST': 'ec2-107-20-249-68.compute-1.amazonaws.com',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
 
+db_from_env = dj_database_url.config()
+DATABASES['default'].update(db_from_env)
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
