@@ -26,7 +26,7 @@ SECRET_KEY = 'hjrqjuhxklp%q!5#&544=hfty*13+)w83z9)dju@-(o3he#yea'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0','localhost','cryptic-brook-53433.herokuapp.com']
 
 
 # Application definition
