@@ -100,30 +100,34 @@ JWT_AUTH = {
     'JWT_ALLOW_REFRESH' : True,
     'JWT_EXPIRATION_DELTA' : datetime.timedelta(seconds=600), #10 mins
 }
-CACHEOPS_DEFAULTS = {
-    'timeout': 60*60
-}
-CACHEOPS_REDIS = "redis://localhost:6379/1"
-CACHEOPS = {
-    'auth.User': {'ops':{'fetch','get'},'timeout': 60*60},
-    'auth.*': {'ops':{'fetch', 'get'}, 'timeout': 60*60},
-    'projects.Project':{'ops':{'fetch','get'},'timeout':60*60},
-    'profiles.Profile':{'ops':{'fetch','get'}},
-    '*.*':{},
-}
+#CACHEOPS_DEFAULTS = {
+#    'timeout': 60*60
+#}
+#CACHEOPS_REDIS = "redis://localhost:6379/1"
+#CACHEOPS = {
+#    'auth.User': {'ops':{'fetch','get'},'timeout': 60*60},
+#    'auth.*': {'ops':{'fetch', 'get'}, 'timeout': 60*60},
+#    'projects.Project':{'ops':{'fetch','get'},'timeout':60*60},
+#    'profiles.Profile':{'ops':{'fetch','get'}},
+#    '*.*':{},
+#}
 
-CACHEOPS_PREFIX = 'projects.urls.cacheops_prefix'
+#CACHEOPS_PREFIX = 'projects.urls.cacheops_prefix'
 
 
-CACHE_TTL = 60 * 15
+#CACHE_TTL = 60 * 15
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'd4qetq3getfbtf',
+        'USER': 'iwifdlfaprgqqd',
+        'PASSWORD': '40c0db4d5f86222b8ca845c4066cfb85f36315e023ceaa31b40461b0efb9555d',
+        'HOST': 'ec2-107-20-249-68.compute-1.amazonaws.com',
+        'PORT': '5432',
     }
 }
 
@@ -172,3 +176,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+import django_heroku
+django_heroku.settings(locals())
