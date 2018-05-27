@@ -26,7 +26,7 @@ SECRET_KEY = 'hjrqjuhxklp%q!5#&544=hfty*13+)w83z9)dju@-(o3he#yea'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0','localhost','cryptic-brook-53433.herokuapp.com']
+ALLOWED_HOSTS = ['0.0.0.0','localhost','borderless.herokuapp.com']
 
 
 # Application definition
@@ -123,9 +123,9 @@ JWT_AUTH = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'd4qetq3getfbtf',
-        'USER': 'iwifdlfaprgqqd',
-        'PASSWORD': '40c0db4d5f86222b8ca845c4066cfb85f36315e023ceaa31b40461b0efb9555d',
+        'NAME': os.environ.get('DB_NAME',''),
+        'USER': os.environ.get('DB_USER',''),
+        'PASSWORD': os.environ.get('DB_PASS',''),
         'HOST': 'localhost',
         'PORT': '5432',
     }
