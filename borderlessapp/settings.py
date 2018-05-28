@@ -154,10 +154,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 #CORS ORIGIN CONFIG
 # A list of origin hostnames that are authorized to make cross-site HTTP requests.
-CORS_ORIGIN_WHITELIST = (
-    '127.0.0.1:3000', #Allow react app
-    'localhost:3000',
-)
+CORS_ORIGIN_ALLOW_ALL = True
 
 
 # Internationalization
