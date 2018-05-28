@@ -1,4 +1,7 @@
 # Borderless is your new way of bringing creative ideas to life
+
+## Any push to production is deployed to heroku.
+
 ## Instalation
 
 * Download Project
