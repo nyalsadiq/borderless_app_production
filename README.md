@@ -10,4 +10,4 @@
 * Navigate to root directory
 * Create .env file with database credentials
 * Run `heroku local web`
-* Open browser at `localhost:8000/`
+* Open browser at location detailed in terminal
