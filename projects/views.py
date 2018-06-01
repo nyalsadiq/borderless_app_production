@@ -38,7 +38,7 @@ class IndexView(generics.ListCreateAPIView):
         Returns a list of projects at low detail.
         """
         projects = Project.objects.all()
-        serializer = ProjectSerializer(projects, many=True)
+        serializer = ProjectDetailSerializer(projects, many=True)
         return Response(serializer.data)
     
     def perform_create(self, serializer):
