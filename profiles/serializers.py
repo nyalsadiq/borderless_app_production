@@ -10,7 +10,7 @@ logger = logging.getLogger("profiles")
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ('id','bio','location')
+        fields = ('id','first_name','surname','bio','location')
 
 class SkillSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
