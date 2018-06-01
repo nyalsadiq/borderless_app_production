@@ -37,12 +37,7 @@ class SkillView(generics.RetrieveUpdateDestroyAPIView):
         Creates a new skill for user with id = {id}
         Must be owner of user to make a skill.
         """
-        user_id = kwargs.get('pk')
-        user = get_object_or_404(User, pk=user_id)
-
-        if request.user != user:
-            return Response("You do not have permission to perform this action.", status=status.HTTP_403_FORBIDDEN)
-
+        user = request.user
         serializer = SkillSerializer(data = request.data)
         if serializer.is_valid():
             serializer.save(user = user)
