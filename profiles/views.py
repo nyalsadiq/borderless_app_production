@@ -28,14 +28,30 @@ class ProfileList(generics.ListCreateAPIView):
     serializer_class = UserSerializer
 
 class SkillView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    get:
+    Returns skill with id = {id}
+
+    put:
+    Updates skill with id = {id}
+
+    patch:
+    Updates skill with id = {id}
+
+    delete:
+    Deletes skill with id = {id}
+
+    """
     queryset = Skill.objects.all()
     serializer_class = SkillSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,IsSkillOwnerOrReadOnly)
 
     def post(self, request, *args, **kwargs):
         """
-        Creates a new skill for user with id = {id}
+        Creates a new skill for authenticated user.
         Must be owner of user to make a skill.
+        Do not need to send the correct user id in get request
+        (just use any number)
         """
         user = request.user
         serializer = SkillSerializer(data = request.data)
