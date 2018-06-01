@@ -129,7 +129,7 @@ class ReactView(generics.RetrieveUpdateDestroyAPIView):
         likes = project.likes + 1
         serializer = ProjectDetailSerializer(project,data={'likes': likes}, partial=True)
         if serializer.is_valid():
-            serializer.save(owner=request.user)
+            serializer.save()
             return Response(status=status.HTTP_202_ACCEPTED)
     
         return Response(status=status.HTTP_400_BAD_REQUEST)
