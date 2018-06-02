@@ -101,7 +101,7 @@ class RequirementView(generics.RetrieveUpdateDestroyAPIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-class ReactView(generics.RetrieveUpdateDestroyAPIView):
+class CommentView(generics.RetrieveUpdateDestroyAPIView):
     """
         put:
         Updates the comment with id = {id}
@@ -117,22 +117,6 @@ class ReactView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly)
-
-    def get(self, request, *args, **kwargs):
-        """
-        Leave a like for project with id = {id}.
-        Incremements "like" field by 1.
-        """
-        project_id = kwargs.get('pk')
-        project = get_object_or_404(Project, pk=project_id)    
-
-        likes = project.likes + 1
-        serializer = ProjectDetailSerializer(project,data={'likes': likes}, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(status=status.HTTP_202_ACCEPTED)
-    
-        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, *args, **kwargs):
         """
@@ -150,6 +134,35 @@ class ReactView(generics.RetrieveUpdateDestroyAPIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['get','delete'])
+@permission_classes((permissions.IsAuthenticated,))
+def like_or_unlike(request, *args, **kwargs):
+    """
+    get:
+    Leaves a like for project with id = {id}
+    delete:
+    Removes the like for project with id = {id}
+    """  
+    project_id = kwargs.get('pk')
+    project = get_object_or_404(Project, pk=project_id)    
+
+
+    if request.method == "GET":
+        likes = project.likes + 1
+    elif request.method == "DELETE":
+        if project.likes == 0:
+            likes = 0
+        else:
+            likes = project.likes - 1
+    else:
+        likes = project.likes
+
+    serializer = ProjectDetailSerializer(project,data={'likes': likes}, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+    return Response(status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['get'])
 @permission_classes((permissions.IsAuthenticated,))
