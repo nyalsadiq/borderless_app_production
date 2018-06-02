@@ -28,7 +28,11 @@ class ProjectDetailSerializer(serializers.HyperlinkedModelSerializer):
     requirements = RequirementSerializer(many=True, required=False, read_only=True)
     owner = serializers.ReadOnlyField(source='owner.username')
     comments = CommentSerializer(many=True, required=False, read_only=True)
+    comment_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
-        fields = ('id','title','owner', 'description','location','requirements','comments', 'likes')
+        fields = ('id','title','owner', 'description','location','requirements','comments', 'likes','comment_count')
+    
+    def get_comment_count(self,obj):
+        return Comment.objects.filter(project = obj).count()
