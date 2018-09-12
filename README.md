@@ -2,7 +2,7 @@
 
 ## Any push to master is deployed to heroku.
 
-## Instalation
+## Installation
 
 * Download Project
 * Navigate to directory containing requirements.txt
