@@ -1,4 +1,4 @@
-Django==2.0
+Django==2.1.5
 pytz==2017.3
 coreapi==2.3.3
 coreschema==0.0.4
