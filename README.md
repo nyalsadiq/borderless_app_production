@@ -1,5 +1,5 @@
 # Borderless is your new way of bringing creative ideas to life
-<img src="https://github.com/nyalsadiq/borderless_react/blob/master/logo.png" alt="logo" width="100"/>
+<img src="https://github.com/nyalsadiq/borderless_app_production/blob/master/logo.png" alt="logo" width="100"/>
 
 ### The easy way to find collaborators for your creative projects.
 
