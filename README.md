@@ -1,6 +1,7 @@
 # Borderless is your new way of bringing creative ideas to life
+<img src="https://github.com/nyalsadiq/borderless_react/blob/master/logo.png" alt="logo" width="100"/>
 
-## Any push to master is deployed to heroku.
+### The easy way to find collaborators for your creative projects.
 
 ## Installation
 
